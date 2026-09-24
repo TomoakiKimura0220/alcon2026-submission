@@ -2,5 +2,5 @@ torch==2.5.1
 torchvision==0.20.1
 numpy
 Pillow
-setuptools
-py2exe
+setuptools<70
+py2exe==0.13.0

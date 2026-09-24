@@ -1,0 +1,21 @@
+name: build-windows
+on:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install
+        run: python -m pip install -r requirements-build.txt
+      - name: Build
+        run: python build/setup_py2exe.py py2exe
+      - uses: actions/upload-artifact@v4
+        with:
+          name: alcon-windows-build
+          path: dist

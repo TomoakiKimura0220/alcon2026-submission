@@ -1,6 +1,6 @@
 torch==2.5.1
 torchvision==0.20.1
+transformers==4.57.1
 numpy
 Pillow
-setuptools<70
-py2exe==0.13.0
+pyinstaller

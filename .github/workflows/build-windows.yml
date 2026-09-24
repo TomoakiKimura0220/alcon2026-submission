@@ -1,21 +1,64 @@
 name: build-windows
+
 on:
   workflow_dispatch:
+
 jobs:
   build:
     runs-on: windows-2022
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
           lfs: true
-      - uses: actions/setup-python@v5
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
-      - name: Install
-        run: python -m pip install -r requirements-build.txt
-      - name: Build
-        run: python build/setup_py2exe.py py2exe
-      - uses: actions/upload-artifact@v4
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-build.txt
+
+      - name: Build A
+        run: |
+          pyinstaller --noconfirm --clean --onedir `
+            --name alcon_A `
+            --collect-all torch `
+            --collect-all torchvision `
+            --collect-all transformers `
+            app/run_a.py
+
+      - name: Build B
+        run: |
+          pyinstaller --noconfirm --clean --onedir `
+            --name alcon_B `
+            --collect-all torch `
+            --collect-all torchvision `
+            --collect-all transformers `
+            app/run_b.py
+
+      - name: Build C
+        run: |
+          pyinstaller --noconfirm --clean --onedir `
+            --name alcon_C `
+            --collect-all torch `
+            --collect-all torchvision `
+            --collect-all transformers `
+            app/run_c.py
+
+      - name: Copy weights
+        shell: pwsh
+        run: |
+          Copy-Item weights -Destination dist\alcon_A -Recurse
+          Copy-Item weights -Destination dist\alcon_B -Recurse
+          Copy-Item weights -Destination dist\alcon_C -Recurse
+
+      - name: Upload executables
+        uses: actions/upload-artifact@v4
         with:
           name: alcon-windows-build
           path: dist

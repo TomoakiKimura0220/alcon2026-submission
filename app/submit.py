@@ -82,9 +82,9 @@ def main():
         result = [j.result() for j in jobs]
     result.sort(key=lambda x: x[0])
     write_output(root / "output.csv", [r for _, r in result])
-    with (root / "execution_metrics.csv").open("w", encoding="utf-8", newline="") as f:
-        w = csv.writer(f); w.writerow(["index", "image", "seconds"])
-        for i, r in result: w.writerow([i, rows[i]["name"], f'{r["seconds"]:.6f}'])
+    # with (root / "execution_metrics.csv").open("w", encoding="utf-8", newline="") as f:
+    #     w = csv.writer(f); w.writerow(["index", "image", "seconds"])
+    #     for i, r in result: w.writerow([i, rows[i]["name"], f'{r["seconds"]:.6f}'])
 
 
 if __name__ == "__main__": main()

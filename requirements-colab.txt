@@ -1,0 +1,4 @@
+# Keep the CUDA-enabled torch/torchvision pair supplied by Colab.
+transformers==4.57.1
+numpy>=1.26,<3
+Pillow>=10.4,<13

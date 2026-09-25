@@ -39,6 +39,7 @@ jobs:
       - name: Copy student model
         shell: pwsh
         run: |
+	  New-Item -ItemType Directory -Force -Path dist\alcon_B\weights
           Copy-Item weights\student_distilled.pt dist\alcon_B\weights\student_distilled.pt -Force
 
       - name: Package runtime

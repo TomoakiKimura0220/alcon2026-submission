@@ -38,11 +38,11 @@ def predict(model, image: Image.Image, size: int, device: str) -> np.ndarray:
 
 
 def level(ratio: float) -> int:
-    # 暫定共通閾値: 3.5%, 7.5%, 25%
-    return int(np.searchsorted(np.asarray([3.5, 7.5, 25.0]), ratio, side="right"))
+    # 暫定共通閾値: 3.5%, 7%, 25%
+    return int(np.searchsorted(np.asarray([3.5, 7.0, 25.0]), ratio, side="right"))
 
 
-def process_one(index, row, root, model, mode, size, device):
+def process_one(index, row, root, model, size, device):
     started = time.perf_counter()
     rel = Path(row["name"].replace("\\", os.sep))
     image_path = root / rel
@@ -61,7 +61,7 @@ def process_one(index, row, root, model, mode, size, device):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--mode", choices=["A", "B", "C"], default="A")
-    ap.add_argument("--workers", type=int, default=2)
+    ap.add_argument("--workers", type=int, default=10)
     ap.add_argument("--size", type=int, default=1024)
     ap.add_argument("--device", choices=["cpu", "cuda"], default="cpu")
     args = ap.parse_args()
@@ -78,7 +78,7 @@ def main():
     # Cの前処理は提出版の初期実装ではAと同じにし、出力仕様を先に安定させる。
     # 追加前処理は検証後にCへ実装する。
     with ThreadPoolExecutor(max_workers=max(1, args.workers)) as pool:
-        jobs = [pool.submit(process_one, i, r, root, model, args.mode, args.size, args.device) for i, r in enumerate(rows)]
+        jobs = [pool.submit(process_one, i, r, root, model, args.size, args.device) for i, r in enumerate(rows)]
         result = [j.result() for j in jobs]
     result.sort(key=lambda x: x[0])
     write_output(root / "output.csv", [r for _, r in result])

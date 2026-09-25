@@ -1,4 +1,4 @@
-name: build-windows
+name: build-windows-b
 
 on:
   workflow_dispatch:
@@ -18,19 +18,14 @@ jobs:
         with:
           python-version: "3.10"
 
-      - name: Install dependencies
+      - name: Install CPU PyTorch
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements-build.txt
+          pip install --index-url https://download.pytorch.org/whl/cpu torch==2.5.1+cpu torchvision==0.20.1+cpu
 
-      - name: Build A
+      - name: Install build dependencies
         run: |
-          pyinstaller --noconfirm --clean --onedir `
-            --name alcon_A `
-            --collect-all torch `
-            --collect-all torchvision `
-            --collect-all transformers `
-            app/run_a.py
+          pip install -r requirements-build.txt
 
       - name: Build B
         run: |
@@ -41,24 +36,21 @@ jobs:
             --collect-all transformers `
             app/run_b.py
 
-      - name: Build C
-        run: |
-          pyinstaller --noconfirm --clean --onedir `
-            --name alcon_C `
-            --collect-all torch `
-            --collect-all torchvision `
-            --collect-all transformers `
-            app/run_c.py
-
-      - name: Copy weights
+      - name: Copy student model
         shell: pwsh
         run: |
-          Copy-Item weights -Destination dist\alcon_A -Recurse
-          Copy-Item weights -Destination dist\alcon_B -Recurse
-          Copy-Item weights -Destination dist\alcon_C -Recurse
+          Copy-Item weights\student_distilled.pt dist\alcon_B\weights\student_distilled.pt -Force
 
-      - name: Upload executables
+      - name: Package runtime
+        shell: pwsh
+        run: |
+          Compress-Archive `
+            -Path dist\alcon_B\* `
+            -DestinationPath alcon_B_runtime.zip `
+            -CompressionLevel Optimal
+
+      - name: Upload runtime
         uses: actions/upload-artifact@v4
         with:
-          name: alcon-windows-build
-          path: dist
+          name: alcon-B-runtime
+          path: alcon_B_runtime.zip
